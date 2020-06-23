@@ -17,8 +17,8 @@ class Destruct:
         return combo_df
 
     @classmethod
-    def fusion(cls, file_1, file_2):
-        fusion_df = Destruct._create_df(file_1, file_2, 1)
+    def fusion(cls, file):
+        fusion_df = Destruct._create_df(file, 1)
         fusion_df.columns = ['Destruct', 'Shear Strength', 'Shear Break Code', 'B',
                              'Top Peel Strength', 'Top Peel Break Code', 'G',
                              'Bottom Peel Strength', 'Bottom Peel Break Code', 'H']
@@ -32,8 +32,8 @@ class Destruct:
         return cls(fusion_df, test_cols=[1, 3, 5])
 
     @classmethod
-    def extrusion(cls, file_1, file_2):
-        ex_df = Destruct._create_df(file_1, file_2, 2)
+    def extrusion(cls, file):
+        ex_df = Destruct._create_df(file, 2)
         ex_df.columns = ['Destruct', 'B', 'Shear Strength', 'Shear Break Code',
                          'Peel Strength', 'Peel Break Code', 'G']
         ex_df = ex_df.fillna(method='ffill')
