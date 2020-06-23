@@ -3,45 +3,45 @@ import pandas as pd
 
 class Destruct:
 
-    def __init__(self, df, test_cols=None):
+    def __init__(self, df, test_nums=None):
         self._df = df
-        self._test_cols = test_cols
+        self._test_nums = test_nums
+
+    def __str__(self):
+        return f'{self._df}'
 
     @staticmethod
     def _create_df(file, col):
-        combo_df = pd.concat(pd.read_excel(file, sheet_name=None))
+        combo_df = pd.concat(pd.read_excel(file, sheet_name=None, header=None))
         combo_df = combo_df.dropna(thresh=4, axis=0)
         filter_1 = combo_df.iloc[:, col] != 'STRENGTH'
         filter_2 = combo_df.iloc[:, col] != '(ppi)'
-        combo_df = combo_df[filter_1 & filter_2]
+        filter_3 = combo_df.iloc[:, col] != '-'
+        combo_df = combo_df[filter_1 & filter_2 & filter_3]
         return combo_df
 
     @classmethod
     def fusion(cls, file):
         fusion_df = Destruct._create_df(file, 1)
-        fusion_df.columns = ['Destruct', 'Shear Strength', 'Shear Break Code', 'B',
-                             'Top Peel Strength', 'Top Peel Break Code', 'G',
-                             'Bottom Peel Strength', 'Bottom Peel Break Code', 'H']
+        fusion_df.columns = ['Destruct', 'Shear Strength', 'Shear Break Code', 'D', 'Top Peel Strength',
+                             'Top Peel Break Code', 'G', 'Bottom Peel Strength', 'Bottom Peel Break Code', 'J']
         fusion_df = fusion_df.fillna(method='ffill')
         for i in fusion_df.columns:
             if 'Strength' in i:
                 fusion_df[i] = pd.to_numeric(fusion_df[i], downcast='float')
-        del fusion_df['B']
-        del fusion_df['G']
-        del fusion_df['H']
-        return cls(fusion_df, test_cols=[1, 3, 5])
+        fusion_df = fusion_df.drop(['D', 'G', 'J'], axis=1)
+        return cls(fusion_df, test_nums=[1, 3, 5])
 
     @classmethod
     def extrusion(cls, file):
         ex_df = Destruct._create_df(file, 2)
         ex_df.columns = ['Destruct', 'B', 'Shear Strength', 'Shear Break Code',
-                         'Peel Strength', 'Peel Break Code', 'G']
+                         'Peel Strength', 'Peel Break Code', 'G', 'H']
         ex_df = ex_df.fillna(method='ffill')
         ex_df['Shear Strength'] = pd.to_numeric(ex_df['Shear Strength'], downcast='float')
         ex_df['Peel Strength'] = pd.to_numeric(ex_df['Peel Strength'], downcast='float')
-        del ex_df['B']
-        del ex_df['G']
-        return cls(ex_df, test_cols=[1, 3])
+        ex_df = ex_df.drop(['B', 'G', 'H'], axis=1)
+        return cls(ex_df, test_nums=[1, 3])
 
     def avg_values(self, test):
         g = self._df.loc[:, f'{test} Strength'].mean()
@@ -59,9 +59,13 @@ class Destruct:
 
     def get_fails(self, test):
         df_1 = self._df
-        df_1['Failures'] = df_1[f'{test} Break Code'].str.extract('.*\((.*)\).*', expand=True)
-        fail = df_1.dropna(axis=0)
-        return fail
+        test_s = f'{test} Strength'
+        test = f'{test} Break Code'
+        fail_slice = df_1.loc[df_1[test].str.contains('AD'), ['Destruct', test_s, test]]
+        if not fail_slice.empty:
+            return fail_slice
+        else:
+            raise ValueError('No failures found in data-set')
 
     def plot_values(self, size=(10, 7)):
-        return self._df.iloc[:, self._test_cols].plot.box(figsize=size)
+        return self._df.iloc[:, self._test_nums].plot.box(figsize=size)
