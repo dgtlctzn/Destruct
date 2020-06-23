@@ -8,10 +8,8 @@ class Destruct:
         self._test_cols = test_cols
 
     @staticmethod
-    def _create_df(file_1, file_2, col):
-        df_1 = pd.read_csv(file_1)
-        df_2 = pd.read_csv(file_2)
-        combo_df = pd.concat([df_1, df_2])
+    def _create_df(file, col):
+        combo_df = pd.concat(pd.read_excel(file, sheet_name=None))
         combo_df = combo_df.dropna(thresh=4, axis=0)
         filter_1 = combo_df.iloc[:, col] != 'STRENGTH'
         filter_2 = combo_df.iloc[:, col] != '(ppi)'
@@ -59,9 +57,9 @@ class Destruct:
         break_count = df_1[f'{test} Break Code'].value_counts()
         return break_count
 
-    def get_fails(self):
+    def get_fails(self, test):
         df_1 = self._df
-        df_1['How Bad'] = df_1['Shear Break Code'].str.extract('.*\((.*)\).*', expand=True)
+        df_1['Failures'] = df_1[f'{test} Break Code'].str.extract('.*\((.*)\).*', expand=True)
         fail = df_1.dropna(axis=0)
         return fail
 
