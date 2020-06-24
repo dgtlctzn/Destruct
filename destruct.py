@@ -35,12 +35,12 @@ class Destruct:
     @classmethod
     def extrusion(cls, file):
         ex_df = Destruct._create_df(file, 2)
-        ex_df.columns = ['Destruct', 'B', 'Shear Strength', 'Shear Break Code',
-                         'Peel Strength', 'Peel Break Code', 'G', 'H']
+        ex_df.columns = ['Destruct', 'B', 'Shear Strength', 'Shear Break Code', 'Peel Strength',
+                         'Peel Break Code', 'G']
         ex_df = ex_df.fillna(method='ffill')
         ex_df['Shear Strength'] = pd.to_numeric(ex_df['Shear Strength'], downcast='float')
         ex_df['Peel Strength'] = pd.to_numeric(ex_df['Peel Strength'], downcast='float')
-        ex_df = ex_df.drop(['B', 'G', 'H'], axis=1)
+        ex_df = ex_df.drop(['B', 'G'], axis=1)
         return cls(ex_df, test_nums=[1, 3])
 
     def avg_values(self, test):
