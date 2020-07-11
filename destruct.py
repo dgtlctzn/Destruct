@@ -10,6 +10,7 @@ class Destruct:
     def __str__(self):
         return f'{self._df}'
 
+    # dataframe construction common to both extrusion and fusion tests
     @staticmethod
     def _create_df(file, col):
         combo_df = pd.concat(pd.read_excel(file, sheet_name=None, header=None))
@@ -43,20 +44,24 @@ class Destruct:
         ex_df = ex_df.drop(['B', 'G'], axis=1)
         return cls(ex_df, test_nums=[1, 3])
 
+    # gives average strengths for all tests of a particular type ie. peel/shear
     def avg_values(self, test):
         g = self._df.loc[:, f'{test} Strength'].mean()
         return f'The average {test} values are: {round(g, 2)} lbs/in.'
 
+    # returns the id of each destruct
     def all_names(self):
         name_df = self._df
         names = name_df['Destruct'].unique()
         return str(len(names)) + ' Destructs:', names
 
+    # each destruct is assigned a type based on the way it reacts to being pulled apart
     def get_break_c(self, test):
         df_1 = self._df
         break_count = df_1[f'{test} Break Code'].value_counts()
         return break_count
 
+    # Fails are destructs with improperly welded seams
     def get_fails(self, test):
         df_1 = self._df
         test_s = f'{test} Strength'
@@ -67,5 +72,6 @@ class Destruct:
         else:
             raise ValueError('No failures found in data-set')
 
+    # gives a quick visualization of the median/range of the strengths of all test types
     def plot_values(self, size=(10, 7)):
         return self._df.iloc[:, self._test_nums].plot.box(figsize=size)
