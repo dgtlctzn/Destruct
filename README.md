@@ -9,4 +9,4 @@ The two types of welds are named fusion and extrusion. Each type of weld has bot
 the way they are pulled apart.
 
 I wrote a class that concatenates Excel data and provides quick summaries of average strengths and break types for 
-large amounts of data that extend over dozens of Excel sheets. 
+large amounts of data that extend over dozens of Excel sheets. All data in the .xlsx files has been scrambled. 
